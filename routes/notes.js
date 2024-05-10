@@ -19,15 +19,15 @@ router.post("/notes", async (req, res, next) => {
     return res.status(422).json({ err: "Attach all files." });
   }
   // Create file IDs
-  const pdf = files['pdf'][0].path;
-  const xlsx = files['xlsx'][0].path;
+  const pdf = files['pdf'][0];
+  const xlsx = files['xlsx'][0];
   let pdfID = '';
   let xlsxID = '';
   try {
     pdfID = await addFile(pdf.path);
     xlsxID = await addFile(xlsx.path);
-    fs.unlink(pdf, (err) => console.log('Could not delete pdf file'));
-    fs.unlink(xlsx, (err) => console.log('Could not delete .xlsx file.'))
+    fs.unlink(pdf.path, (err) => {if (err) console.log('Could not delete pdf file')});
+    fs.unlink(xlsx.path, (err) => {if (err) console.log('Could not delete .xlsx file.')})
   } catch (err) {
     console.log(err);
     return res.status(500).json({err: "The files could not be uploaded. Try again."});
