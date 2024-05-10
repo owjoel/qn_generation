@@ -1,8 +1,12 @@
+import { config } from "dotenv";
 import express from "express";
-
-import questionsRoutes from "./routes/questions.js";
 import multer from "multer";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
+
+// import questionsRoutes from "./routes/questions.js";
+import notesRoutes from "./routes/notes.js";
+import Storage from "./utils/storage.js";
 
 const fileFilter = (req, file, cb) => {
   if (
@@ -22,10 +26,14 @@ const fileStorage = multer.diskStorage({
     cb(null, "public/pdf");
   },
   filename: (_req, file, cb) => {
-    cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname);
+    cb(
+      null,
+      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
+    );
   },
 });
 
+config();
 const app = express();
 
 // Middleware
@@ -38,8 +46,12 @@ app.use(
 );
 
 // Routes
-app.use(questionsRoutes);
+app.use(notesRoutes);
+// app.use(questionsRoutes);
 
-app.listen(3000);
-
-export default app;
+mongoose
+  .connect(process.env.MONGODB_CONNECTION_STRING)
+  .then(app.listen(3000))
+  .catch((err) => {
+    console.log(err);
+  });
