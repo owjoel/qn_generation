@@ -1,20 +1,34 @@
 import { Router } from "express";
-
-//import { readPDF } from "../utils/generate";
+import { generate } from "../utils/assistant.js";
+import { getNotes } from "../models/notes.js";
 
 const router = Router();
 
-router.post("/questions/saq", (req, res, next) => {
-  const type = req.body.type; // Question type (SAQ / MCQ)
-  const files = req.body.files; // Array of fileIDs
+router.post("/questions", async (req, res, next) => {
+  const id = req.body.id;
+  const course = req.body.course;
+  const topic = req.body.topic;
+  const keywords = req.body.keywords; // An array of keywords
+  const questionType = req.body.type;
+  const numQuestions = req.body.num;
 
-  // const file = req.file;
-  generateQuestions({type: type, files: files});
-  return res.status(200).json();
+
+  const notes = await getNotes(id);
+  if (notes == null) {
+    console.log('Notes not found for id: ' + id);
+    res.status(422).json({ err: 'Files were not found' });
+  }
+  const files = [notes.pdfID, notes.refID];
+
+  generate({
+    course: course,
+    topic: topic,
+    keywords: keywords,
+    questionType: questionType,
+    numQuestions: numQuestions,
+    files: files,
+  });
+  return res.status(200).json('Works so far');
 });
-
-router.post("/questions/mcq");
-
-router.post("/questions");
 
 export default router;

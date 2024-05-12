@@ -1,0 +1,19 @@
+question: What exactly does continuous integration do?
+answer: Automatically build and test a software in response to every change committed to the source code repository
+score: 4
+
+question: What does it mean by A/B testing?
+answer: In A/B testing, we divide the audience into two group. We then show each group a different version of the software. Finally, we measure and analyze responses from the two groups.
+score: 4
+
+question: What does it mean by A/B testing?
+answer: Offer opportunities to do performance validation in a production-like environment
+score: 4
+
+question: How do we carry out rolling update in production?
+answer: Slowly replace previous versions of a service with the new version by completely replacing the infrastructure on which the service is running
+score: 4
+
+question: Explain one problem of continuous deployment in user-facing software systems
+answer: Lack of comprehensive testing such as manual testing in addition to automated testing
+score: 4

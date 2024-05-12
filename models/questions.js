@@ -1,8 +1,18 @@
 import { config } from "dotenv";
 
 import { addFile, createAssistant, retrieveAssistant } from "../utils/assistant";
+import mongoose from "mongoose";
+import { Binary } from "mongodb";
 
-config();
+const questionsSchema = mongoose.Schema(
+    {
+        course: { type: String, required: true},
+        topic: { type: String, required: true},
+        questions: {type: Binary, required: true},
+    }
+)
+
+
 export const generateQuestions = (query) => {
     const {course, title, type, pdf, xlsx} = query;
 

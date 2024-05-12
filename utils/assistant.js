@@ -5,8 +5,6 @@ import { config } from "dotenv";
 import OpenAI from "openai";
 
 import { assistantInstructions, threadPrompt } from "./prompt.js";
-import { Readable } from "stream";
-import FormData from "form-data";
 
 config();
 const openai = new OpenAI();
@@ -29,21 +27,9 @@ export const addFile = async (filepath) => {
     file: fs.createReadStream(filepath),
     purpose: "assistants",
   });
-  console.log(f);
+  console.log(`[OpenAI] Uploaded file: ${f.filename}`);
   return f.id;
 };
-
-// Use existing fileIDs to create a new vector store. Returns the ID.
-export async function createVectorStore(fileIDs) {
-  const vs = await openai.beta.vectorStores.create({
-    name: course,
-  });
-  console.log(`${course} vectorStore created.`);
-  await openai.beta.vectorStores.fileBatches.create(vs.id, {
-    file_ids: fileIDs,
-  });
-  return vs.id;
-}
 
 // Updates the specified assistant with the new vector store.
 export async function updateAssistantWithStore(assistantID, storeID) {
@@ -53,20 +39,53 @@ export async function updateAssistantWithStore(assistantID, storeID) {
 }
 
 // TODO: files needs to be a mapped array of objects
-const createThread = async (assistant, questionType, numQuestions, files) => {
-  const run = await openai.beta.threads.createAndRun({
-    assistant_id: assistant.id,
-    thread: {
-      messages: [
-        {
-          role: "user",
-          content: threadPrompt(questionType, numQuestions),
-          attachments: files,
-        },
-      ],
-    },
+async function createThreadAndRun(options) {
+  const {course, topic, keywords, questionType, numQuestions, files} = options;
+  const assistantID = process.env.OPENAI_ASSISTANT_ID;
+  const prompt = threadPrompt(course, topic, keywords, questionType, numQuestions);
+  const attachments = files.map(id => {
+    return { file_id: id, tools: [{ type: "file_search" }]};
+  })
+
+  const thread = await openai.beta.threads.create({
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+        attachments: attachments,
+      },
+    ]
+  })
+
+  const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+    assistant_id: assistantID,
   });
-  console.log(run);
+
+  const messages = await openai.beta.threads.messages.list(thread.id, {
+    run_id: run.id
+  });
+
+  const message = messages.data.pop();
+  if (message.content[0].type == 'text') {
+    const { text } = message.content[0];
+    console.log(text.value);
+  }
+
+  // const run = await openai.beta.threads.createAndRun({
+  //   assistant_id: assistantID,
+  //   thread: {
+  //     messages: [
+  //       {
+  //         role: "user",
+  //         content: prompt,
+  //         attachments: attachments,
+  //       },
+  //     ],
+  //   },
+  // });
+
+  console.log(`[OpenAI] Thread created: ${run.thread_id}`);
+  return run;
 };
 
 export const retrieveAssistant = async (id) => {
@@ -74,38 +93,20 @@ export const retrieveAssistant = async (id) => {
   return assistant;
 };
 
+// export const createVectorStore = async (course, topic, files) => {
+//   const vs = await openai.beta.vectorStores.create({
+//     name: `${course}-${topic}`,
+//     file_ids: files,
+//   });
+//   console.log(`[OpenAI] Vector store created: id=${vs.id}, name=${vs.name}`);
+//   return vs.id;
+// }
 
+export const generate = async (options) => {
+  const run = await createThreadAndRun(options);
+}
 
-  // const formData = new FormData();
-  // formData.append('file', file.buffer, {
-  //   filename: file.originalname,
-  //   contentType: file.mimetype,
-  //   knownLength: file.size,
-  // })
-  // formData.append('purpose', 'assistants');
-
-  // const options = {
-  //   method: 'POST',
-  //   hostname: 'api.openai.com',
-  //   path: '/v1/files',
-  //   headers: {
-  //     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-  //     ...formData.getHeaders()
-  //   }
-  // }
-  // let f;
-  // const req = https.request(options, (res) => {
-  //   let data = '';
-  //   res.on('data', (chunk) => {
-  //     data += chunk;
-  //   });
-  //   res.on('end', () => {
-  //     const parsedData = JSON.parse(data);
-  //     console.log('OpenAI response: ');
-  //     console.log(parsedData);
-  //   })
-  //   res.on('error', (error) => {
-  //     console.log('Error uploading file to OpenAI: ', error);
-  //   })
-  // })
-  // formData.pipe(req);
+export const showMessages = async (id) => {
+  const messages = await openai.beta.threads.messages.list(id);
+  return messages;
+}

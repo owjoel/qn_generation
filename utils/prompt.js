@@ -1,29 +1,27 @@
 // File specifically for containing long OpenAI queries
-export const topicQuery =
-  'Identify the file\'s main theme. It should be written on the first page of the notes. \
-    Then identify the file\'s sub-topic: "Automation", "Software Design", \
-    "Versioning", "XP", "Software Process", "Security", "Support" or "Testing". It should also \
-    be on the first page.\n\n Generate your response as follows: \n\n Main Theme: [Output] \n Sub-Topic: \
-    [Output]. \n\n Skip the pleasantries of acknowledging the user and start generating the topic \
-    immediately (Meaning, do not start with "Sure, here\'s the topic for..." or "Here\'s the topic for...").';
 
 export const assistantInstructions =
-  "Analyse the uploaded lecture notes PDF, and the excel (.xlsx) \
-    file with sample questions and answers. Based on user input, \
-    generate either similar short-answer questions or multiple choice \
-    questions, together with the answers or multiple choices respectively.";
+  "Analyse the uploaded lecture notes PDF, and the reference excel (.xlsx) \
+    file which contains sample questions and answers from the vector store in the user message. \
+    Based on user input and the lecture note content, generate either similar short-answer \
+    questions or multiple choice questions, together with the answers or multiple choices respectively. \
+    The output should be an excel file (.xlsx) in the same format as either the SAQ_Template.json or \
+    MXQ_Template.json accoridngly in your own assistant vector store.";
 
-export const threadPrompt = (questionType, num) => {
+export const threadPrompt = (course, topic, keywords, questionType, num) => {
   let specific = "";
   let type = "";
-
+  console.log(questionType, questionType === 'saq');
   if (questionType === "saq") {
-    specific = "Provide both question and answer based on the lecture notes.";
+    specific = "Provide both questions and answers.";
     type = "short answer questions";
   } else {
     specific =
-      "Generate 1 correct answer from the lecture notes and three wrong answers using incorrect explanation or technical terms from the notes.";
+      "Generate 1 correct answer from the lecture notes and 3 wrong answers using incorrect explanation or technical terms from the notes.";
     type = "multiple choice questions";
   }
-  return `Generate ${num} ${type} relating to the content in the lecture notes. ${specific}`;
+  const prompt = 
+    `Generate ${num} ${type} relating to ${keywords} in the ${course} ${topic} lecture notes, \
+    referencing the sample questions and answers. ${specific}`;
+  return prompt;
 };

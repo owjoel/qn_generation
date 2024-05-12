@@ -1,0 +1,20 @@
+[
+  {
+    "Type": "MCQ",
+    "Title": "Example: what is the capital of Uganda?",
+    "Correct": "<Correct Option Number>",
+    "Choice": "<Option 1>",
+    "Choice_1": "<Option 2>",
+    "Choice_2": "<Option 3>",
+    "Choice_3": "<Option 4>"
+  },
+  {
+    "Type": "MCQ",
+    "Title": "Example: Which of the following is an Agile practice?",
+    "Correct": "<Correct Option Number>",
+    "Choice": "<Option 1>",
+    "Choice_1": "<Option 2>",
+    "Choice_2": "<Option 3>",
+    "Choice_3": "<Option 4>"
+  }
+]
