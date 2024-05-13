@@ -1,0 +1,33 @@
+Here are four multiple-choice questions related to Git Workflow based on the lecture notes:
+
+1. What is the first step in the Git Workflow process?
+   A) Run unit testing on local setup
+   B) Push changes to shared repository
+   C) Write new code and run tests
+   D) Merge code from others
+
+Answer: B) Push changes to shared repository
+
+2. In Git branching and merging, what is the purpose of creating a new branch for a critical issue fix?
+   A) To improve code readability
+   B) To enhance collaboration with team members
+   C) To isolate changes and reduce risks
+   D) To test new features in a separate environment
+
+Answer: C) To isolate changes and reduce risks
+
+3. What is the significance of continuous integration in Git Workflow?
+   A) Automatically build and test code after each commit
+   B) Implement basic unit testing techniques
+   C) Run tests locally before pushing changes
+   D) Separate code development from deployment
+
+Answer: A) Automatically build and test code after each commit
+
+4. When using Git for version control, what is a common practice to avoid integration issues?
+   A) Creating a centralized versioning system
+   B) Utilizing a single repository for all team members
+   C) Implementing distributed versioning with diverse collaboration graphs
+   D) Designating multiple repositories for different code versions
+
+Answer: C) Implementing distributed versioning with diverse collaboration graphs

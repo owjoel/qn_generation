@@ -2,7 +2,7 @@
 import path from "path";
 
 import { Router } from "express";
-import { addFile } from "../utils/assistant.js";
+import { addFile } from "../utils/generate.js";
 import { deleteLocalFiles, getAllCourseTopics, getNotes, saveNotesID } from "../models/notes.js";
 import { createJSONFromFile } from "../utils/files.js";
 

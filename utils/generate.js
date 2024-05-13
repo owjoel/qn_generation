@@ -1,10 +1,8 @@
 import fs from "fs";
-import https from "https"
-
 import { config } from "dotenv";
 import OpenAI from "openai";
 
-import { assistantInstructions, threadPrompt } from "./prompt.js";
+import { genAssistantInstructions, threadPrompt } from "./prompt.js";
 
 config();
 const openai = new OpenAI();
@@ -13,7 +11,7 @@ const openai = new OpenAI();
 export const createAssistant = async (pdf, xlsx) => {
   const assistant = await openai.beta.assistants.create({
     name: "Question Generator",
-    instructions: assistantInstructions,
+    instructions: genAssistantInstructions,
     model: "gpt-3.5-turbo-0125",
     tools: [{ type: "file_search" }],
   });
@@ -39,22 +37,20 @@ export async function updateAssistantWithStore(assistantID, storeID) {
 }
 
 // TODO: files needs to be a mapped array of objects
-async function createThreadAndRun(options) {
+export async function generate(options) {
   const {course, topic, keywords, questionType, numQuestions, files} = options;
-  const assistantID = process.env.OPENAI_ASSISTANT_ID;
+  const assistantID = process.env.OPENAI_ASSISTANT_GENERATOR;
   const prompt = threadPrompt(course, topic, keywords, questionType, numQuestions);
   const attachments = files.map(id => {
     return { file_id: id, tools: [{ type: "file_search" }]};
   })
 
   const thread = await openai.beta.threads.create({
-    messages: [
-      {
+    messages: [{
         role: "user",
         content: prompt,
         attachments: attachments,
-      },
-    ]
+    }]
   })
 
   const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
@@ -68,24 +64,11 @@ async function createThreadAndRun(options) {
   const message = messages.data.pop();
   if (message.content[0].type == 'text') {
     const { text } = message.content[0];
-    console.log(text.value);
+    //console.log(text.value);
+    console.log(`[OpenAI] Thread created: ${run.thread_id}`);
+    return text.value;
   }
-
-  // const run = await openai.beta.threads.createAndRun({
-  //   assistant_id: assistantID,
-  //   thread: {
-  //     messages: [
-  //       {
-  //         role: "user",
-  //         content: prompt,
-  //         attachments: attachments,
-  //       },
-  //     ],
-  //   },
-  // });
-
-  console.log(`[OpenAI] Thread created: ${run.thread_id}`);
-  return run;
+  return null;
 };
 
 export const retrieveAssistant = async (id) => {
@@ -102,9 +85,10 @@ export const retrieveAssistant = async (id) => {
 //   return vs.id;
 // }
 
-export const generate = async (options) => {
-  const run = await createThreadAndRun(options);
-}
+// export const generate = async (options) => {
+//   const output = await createThreadAndRun(options);
+//   return output;
+// }
 
 export const showMessages = async (id) => {
   const messages = await openai.beta.threads.messages.list(id);
