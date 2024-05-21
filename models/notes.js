@@ -137,7 +137,8 @@ export const updateNotesFiles = async (id, file, opt) => {
 
 export const getAllCourseTopics = async (course) => {
   try {
-    const notes = await Notes.find({ index: course }, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec();
+    const notes = course == null ? await Notes.find({}, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec() : await Notes.find({ index: course }, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec();
+    // const notes = await Notes.find({ index: course }, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec();
     return notes;
   } catch (err) {
     console.error(`No notes found for course: ${course}`);
