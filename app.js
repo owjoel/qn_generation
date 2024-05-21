@@ -12,7 +12,8 @@ config();
 const app = express();
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).fields([
     { name: "pdf", maxCount: 1 },
@@ -27,7 +28,7 @@ app.use(questionsRoutes);
 // Initialise DB and server
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING)
-  .then(app.listen(3000))
+  .then(app.listen(8000))
   .catch((err) => {
     console.error(err);
   });

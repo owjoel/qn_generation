@@ -1,0 +1,17 @@
+// This file contains expected output format for multiple choice questions.
+
+Question: Which of the following is an Agile practice?
+Correct: 2
+Choices:
+1. Round Robin
+2. Kanban
+3. Shortest Job Next
+4. Waterfall production
+
+Question: When facing a critical issue in production, what to do?
+Correct: 3
+Choices:
+1. Continue pushing on the same branch
+2. Delete the production server and reinitialise
+3. Branch off to hotfix, test and merge back to main
+4. Add the fix to the backlog to be handled in future.

@@ -29,6 +29,15 @@ export const addFile = async (filepath) => {
   return f.id;
 };
 
+export const deleteFile = async (fileID) => {
+  const f = await openai.files.del(fileID);
+  if (f.deleted) {
+    console.log(f);
+    return true;
+  }
+  return false;
+}
+
 // Updates the specified assistant with the new vector store.
 export async function updateAssistantWithStore(assistantID, storeID) {
   await openai.beta.assistants.update(assistantID, {

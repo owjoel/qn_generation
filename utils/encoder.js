@@ -82,7 +82,7 @@ async function handleRunStatus(run, output, type) {
   if (run.status === 'completed') {
     console.log(run.status);
     const messages = await openai.beta.threads.messages.list(run.thread_id);
-    console.log(messages.data[0].content[0].text.value);
+    // console.log(messages.data[0].content[0].text.value);
     return messages.data[0].content[0].text.value;
   } else if (run.status === 'requires_action') {
     console.log(run.status);
@@ -92,12 +92,12 @@ async function handleRunStatus(run, output, type) {
   }
 }
 
-export async function encodeToJSON(output, type) {
+export async function encodeToJSON(type, output) {
   const assistantID = process.env.OPENAI_ASSISTANT_ENCODER;
   const thread = await openai.beta.threads.create();
   const message = openai.beta.threads.messages.create(thread.id, {
     role: "user",
-    content: encoderMessage(output, type),
+    content: encoderMessage(type, output),
   });
   const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
     assistant_id: assistantID,
@@ -107,6 +107,5 @@ export async function encodeToJSON(output, type) {
     return null;
   }
   const result = JSON.parse(jsonString).output;
-  console.log(result);
   return result;
 }

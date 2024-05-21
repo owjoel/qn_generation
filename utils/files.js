@@ -43,7 +43,7 @@ export const createJSONFromFile = (filename, filepath) => {
       if (err) {
         console.error(err);
       } else {
-        console.log("JSON saved to " + filepath);
+        console.log("JSON saved to " + newPath);
       }
     }
   );

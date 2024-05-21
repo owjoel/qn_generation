@@ -27,11 +27,12 @@ export const threadPrompt = (course, topic, keywords, questionType, num) => {
   let specific = "";
   let type = "";
   if (questionType === "saq") {
-    specific = "Provide both questions and answers.";
+    specific = "Provide both questions and answers. Answer should come immediately after each question.";
     type = "short answer questions";
   } else {
     specific =
-      "Generate 1 correct answer from the lecture notes and 3 wrong answers using incorrect explanation or technical terms from the notes.";
+      "Generate 1 correct answer from the lecture notes and 3 wrong answers using incorrect explanation or technical terms from the notes. \
+      Correct answer number should come immediately after the question, followed by the options, numbered.";
     type = "multiple choice questions";
   }
   const prompt = 

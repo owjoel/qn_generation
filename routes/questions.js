@@ -2,7 +2,7 @@ import fs from "fs";
 import { Router } from "express";
 
 import { generate } from "../utils/generate.js";
-import { getNotes } from "../models/notes.js";
+import { fetchFileIDs, saveGeneratedQuestions } from "../models/notes.js";
 import { encodeToJSON } from "../utils/encoder.js";
 import { createExcelFromJSON, createJSONFromFile } from "../utils/files.js";
 
@@ -10,7 +10,7 @@ import { createExcelFromJSON, createJSONFromFile } from "../utils/files.js";
 const router = Router();
 const MAX_ATTEPMTS = 3;
 
-router.post("/questions", async (req, res, next) => {
+router.put("/questions", async (req, res, next) => {
   const id = req.body.id;
   const course = req.body.course;
   const topic = req.body.topic;
@@ -18,13 +18,13 @@ router.post("/questions", async (req, res, next) => {
   const questionType = req.body.type;
   const numQuestions = req.body.num;
 
-
-  const notes = await getNotes(id);
+  console.log("hi", req.body);
+  const notes = await fetchFileIDs(id);
   if (notes == null) {
     console.log('Notes not found for id: ' + id);
-    res.status(422).json({ err: 'Files were not found' });
+    return res.status(422).json({ err: 'Files were not found' });
   }
-  const files = [notes.pdfID, notes.refID];
+  const files = [notes.pdf.fileID, notes.ref.fileID];
 
   for (let i = 0; i < MAX_ATTEPMTS; i++) {
     const output = await generate({
@@ -42,6 +42,8 @@ router.post("/questions", async (req, res, next) => {
         else console.log('[fs] Write: Raw questions written to file');
       })
       const result = await encodeToJSON(questionType, output); // JSON object of questions
+      let ok = await saveGeneratedQuestions(id, questionType, result);
+      console.log(ok);
       createExcelFromJSON(result, course, topic);
       return res.status(200).json({ msg: 'Excel file created successfully.' });
     }

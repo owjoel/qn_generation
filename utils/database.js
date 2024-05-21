@@ -1,0 +1,1 @@
+const bucket = new MongoDBCollectionNamespace.GridFSBucket(db);

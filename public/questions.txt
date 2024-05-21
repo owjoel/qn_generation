@@ -1,33 +1,14 @@
-Here are four multiple-choice questions related to Git Workflow based on the lecture notes:
+Question: What is the first step in the Git Workflow as described in the DevOps Automation lecture notes?
+Answer: First, clone code from the project’s shared repository hosted on a server, e.g., GitHub
 
-1. What is the first step in the Git Workflow process?
-   A) Run unit testing on local setup
-   B) Push changes to shared repository
-   C) Write new code and run tests
-   D) Merge code from others
+Question: In the Git Workflow, what is typically done after running unit testing locally?
+Answer: Commit to git locally
 
-Answer: B) Push changes to shared repository
+Question: According to the lecture notes, what is the purpose of creating a branch for a new user story in Git branching and merging?
+Answer: To work on the new user story without affecting the main project
 
-2. In Git branching and merging, what is the purpose of creating a new branch for a critical issue fix?
-   A) To improve code readability
-   B) To enhance collaboration with team members
-   C) To isolate changes and reduce risks
-   D) To test new features in a separate environment
+Question: What is the next step after fixing an urgent production issue in Git branching and merging, based on the notes?
+Answer: Create a new branch "hotfix" based on "master" 
 
-Answer: C) To isolate changes and reduce risks
-
-3. What is the significance of continuous integration in Git Workflow?
-   A) Automatically build and test code after each commit
-   B) Implement basic unit testing techniques
-   C) Run tests locally before pushing changes
-   D) Separate code development from deployment
-
-Answer: A) Automatically build and test code after each commit
-
-4. When using Git for version control, what is a common practice to avoid integration issues?
-   A) Creating a centralized versioning system
-   B) Utilizing a single repository for all team members
-   C) Implementing distributed versioning with diverse collaboration graphs
-   D) Designating multiple repositories for different code versions
-
-Answer: C) Implementing distributed versioning with diverse collaboration graphs
+Question: In Continuous Integration implementation, what should be done when the build is broken?
+Answer: Fix the build as soon as it’s broken.

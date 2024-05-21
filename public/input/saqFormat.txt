@@ -1,0 +1,10 @@
+// This file contains sample output format for short answer questions.
+
+Question: What is a Virtual Machine?
+Answer: A VM is a...
+
+Question: What is Git?
+Answer: Git is a version control system
+
+Question: Who created Linux?
+Answer: Linus Torvalds
