@@ -22,6 +22,7 @@
     "homepage": "https://github.com/Coding-Crashkurse/LangChain-JS-Full-Course#readme",
     "dependencies": {
         "body-parser": "^1.20.2",
+        "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "express": "^4.19.2",
         "mongodb": "^6.6.1",

@@ -4,7 +4,7 @@ import { Router } from "express";
 import { generate } from "../utils/generate.js";
 import { fetchFileIDs, saveGeneratedQuestions } from "../models/notes.js";
 import { encodeToJSON } from "../utils/encoder.js";
-import { createExcelFromJSON, createJSONFromFile } from "../utils/files.js";
+import { createExcelFromJSON } from "../utils/files.js";
 
 
 const router = Router();
