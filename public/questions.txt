@@ -1,14 +1,41 @@
-Question: What is the first step in the Git Workflow as described in the DevOps Automation lecture notes?
-Answer: First, clone code from the project’s shared repository hosted on a server, e.g., GitHub
+**Multiple Choice Questions on Git Workflow:**
 
-Question: In the Git Workflow, what is typically done after running unit testing locally?
-Answer: Commit to git locally
+1. What is the first step in the Git Workflow as described in the DevOps automation lecture notes?
+   1. Writing tests for critical code parts.
+   2. Running unit testing.
+   3. Cloning code from the shared repository.
+   4. Pushing changes to the shared repository.
+   
+**Answer: 3. Cloning code from the shared repository.**
 
-Question: According to the lecture notes, what is the purpose of creating a branch for a new user story in Git branching and merging?
-Answer: To work on the new user story without affecting the main project
+2. In Git branching and merging, what is the purpose of creating a new branch for a critical issue?
+   1. To experiment with new features.
+   2. To add a fix for the critical issue.
+   3. To switch to the production environment.
+   4. To continue working on the original user story.
+  
+**Answer: 2. To add a fix for the critical issue.**
 
-Question: What is the next step after fixing an urgent production issue in Git branching and merging, based on the notes?
-Answer: Create a new branch "hotfix" based on "master" 
+3. What strategy is used to merge branches in a Git workflow when branches are on different paths?
+   1. Fast-forward merge.
+   2. Three-way merge.
+   3. Basic merge.
+   4. Pull request merge.
+    
+**Answer: 2. Three-way merge.**
 
-Question: In Continuous Integration implementation, what should be done when the build is broken?
-Answer: Fix the build as soon as it’s broken.
+4. In the context of Continuous Integration (CI), what is a crucial step to ensure the success of the CI pipeline according to the lecture notes?
+   1. Auto-deploying new changes to production.
+   2. Setting up staging environments.
+   3. Running security tests on container images.
+   4. Writing tests for every new story implemented.
+   
+**Answer: 4. Writing tests for every new story that you implement.**
+
+5. What is the primary objective of Infrastructure-as-Code in the DevOps automation workflow?
+   1. To ensure applications are always ready for deployment.
+   2. To define computing and network infrastructure through code.
+   3. To run tests automatically on every push to the main repository.
+   4. To incrementally deploy changes to production environments.
+   
+**Answer: 2. To define computing and network infrastructure via code.**

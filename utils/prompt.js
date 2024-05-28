@@ -24,6 +24,7 @@ export const encoderMessage = (type, output) => {
 }
 
 export const threadPrompt = (course, topic, keywords, questionType, num) => {
+  console.log(questionType);
   let specific = "";
   let type = "";
   if (questionType === "saq") {
@@ -37,6 +38,7 @@ export const threadPrompt = (course, topic, keywords, questionType, num) => {
   }
   const prompt = 
     `Generate ${num} ${type} relating to ${keywords} in the ${course} ${topic} lecture notes, ${specific}`;
+  console.log(prompt);
   return prompt;
 };
 

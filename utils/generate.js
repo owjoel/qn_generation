@@ -32,7 +32,7 @@ export const addFile = async (filepath) => {
 export const deleteFile = async (fileID) => {
   const f = await openai.files.del(fileID);
   if (f.deleted) {
-    console.log(f);
+    console.log("[OpenAI] Deleted file " + fileID);
     return true;
   }
   return false;

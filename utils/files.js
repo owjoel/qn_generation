@@ -58,7 +58,7 @@ export const createExcelFromJSON = (result, course, topic) => {
     const wb = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(wb, sheet, "Questions");
     xlsx.writeFileXLSX(wb, filename)
-    // console.log(output);
+    return filename;
   } catch (err) {
     console.log(err);
   }

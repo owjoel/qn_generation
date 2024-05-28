@@ -2,40 +2,71 @@ import fs from "fs";
 
 import mongoose from "mongoose";
 import { addFile, deleteFile } from "../utils/generate.js";
-import { Binary } from "mongodb";
 import { createJSONFromFile } from "../utils/files.js";
 import path from "path";
 
+const SAQ = "saq";
+const MCQ = "mcq";
+const PDF = "pdf";
+const REF = "ref";
+
+// Schema definitions
+const fileSchema = new mongoose.Schema(
+  { data: { type: Buffer, required: true } },
+  { timestamps: true }
+);
+
 const notesSchema = new mongoose.Schema(
   {
-    index: {type: String, required: true},
+    index: { type: String, required: true },
     course: { type: String, required: true },
     topic: { type: String, required: true },
     pdf: {
-      filename: {type: String, required: true},
+      filename: { type: String, required: true },
       contentType: String,
       size: Number,
-      data: { type: Buffer, required: true },
-      fileID: {type: String, required: true},
-      created: Date
+      fileID: { type: String, required: true },
+      openaiID: { type: String, required: true },
+      created: Date,
     },
     ref: {
-      filename: {type: String, required: true},
+      filename: { type: String, required: true },
       contentType: String,
       size: Number,
-      data: { type: Buffer, required: true },
-      fileID: {type: String, required: true},
-      created: Date
+      fileID: { type: String, required: true },
+      openaiID: { type: String, required: true },
+      created: Date,
     },
-    saq: [{ question: String }],
-    mcq: [{ question: String }]
+    saq: [
+      new mongoose.Schema({
+        question: String,
+      }),
+    ],
+    mcq: [
+      new mongoose.Schema({
+        question: String,
+        correct: String,
+        options: [String],
+      }),
+    ],
   },
   { timestamps: true }
 );
 
-export const saveNotesID = (course, topic, pdf, pdfID, ref, refID) => {
+// Create schemas
+export const Notes = mongoose.model("Notes", notesSchema);
+export const Files = mongoose.model("Files", fileSchema);
+
+// METHODS
+// Create new topic notes and save files ✅
+export async function createNotes (course, topic, pdf, pdfID, ref, refID) {
   const pdfBuffer = fs.readFileSync(pdf.path);
   const refBuffer = fs.readFileSync(ref.path);
+
+  const pdfFile = new Files({ data: pdfBuffer });
+  const refFile = new Files({ data: refBuffer });
+  await pdfFile.save();
+  await refFile.save();
 
   const notes = new Notes({
     index: course.toLowerCase(),
@@ -45,99 +76,87 @@ export const saveNotesID = (course, topic, pdf, pdfID, ref, refID) => {
       filename: pdf.originalname,
       contentType: pdf.mimetype,
       size: pdf.size,
-      data: pdfBuffer,
-      fileID: pdfID,
-      created: new Date()
+      fileID: pdfFile._id,
+      openaiID: pdfID,
+      created: new Date(),
     },
     ref: {
       filename: ref.originalname,
       contentType: ref.mimetype,
       size: ref.size,
-      data: refBuffer,
-      fileID: refID,
-      created: new Date()
+      fileID: refFile._id,
+      openaiID: refID,
+      created: new Date(),
     },
   });
+
   notes.save().then((result) => {
     console.log(`${topic} notes saved.`);
   });
 };
-
-export async function saveGeneratedQuestions(id, type, output) {
-  const data = output.map((question) => {
-    return {
-      question: question.Title,
-    }
-  })
-  console.log(data);
-  try {
-    let update;
-    if (type === "saq") {
-      update = { $push: { saq: { $each: data } } }
-    } else if (type === "mcq") {
-      update = { $push: { mcq: { $each: data } } }
-    } else {
-      console.error('Invalid question type');
-      return false;
-    }
-
-    const doc = await Notes.findByIdAndUpdate(id, update)
-    if (doc == null) {
-      console.error('Notes not found for updating question bank.');
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-}
 
 // Update the file of a specific topic notes.
 export const updateNotesFiles = async (id, file, opt) => {
   try {
     let update;
     const buffer = fs.readFileSync(file.path);
-    if (opt === "pdf") {
-      const fileID = await addFile(file.path);
-      update = { pdf: {
-        filename: file.originalname,
-        contentType: file.mimetype,
-        size: file.size,
-        data: buffer,
-        fileID: fileID,
-        created: new Date(),
-      }};
+    const newFile = new Files({ data: buffer });
+    if (opt === PDF) {
+      const openaiID = await addFile(file.path);
+      update = {
+        pdf: {
+          filename: file.originalname,
+          contentType: file.mimetype,
+          size: file.size,
+          data: buffer,
+          fileID: newFile._id,
+          openaiID: openaiID,
+          created: new Date(),
+        },
+      };
     } else {
       const refName = path.parse(file.originalname).name;
       const refPath = createJSONFromFile(refName, file.path);
-      const fileID = await addFile(refPath);
-      update = { ref: {
-        filename: file.originalname,
-        contentType: file.mimetype,
-        size: file.size,
-        data: buffer,
-        fileID: fileID,
-        created: new Date(),
-    } };
+      const openaiID = await addFile(refPath);
+      update = {
+        ref: {
+          filename: file.originalname,
+          contentType: file.mimetype,
+          size: file.size,
+          data: buffer,
+          fileID: newFile._id,
+          openaiID: openaiID,
+          created: new Date(),
+        },
+      };
     }
     const doc = await Notes.findByIdAndUpdate(id, update);
-    if (opt === "pdf") {
-      return await deleteFile(doc.pdf.fileID);
+    if (opt === PDF) {
+      deleteFile(doc.pdf.openaiID);
+      Files.deleteOne(doc.pdf.fileID);
     } else {
-      return await deleteFile(doc.ref.fileID);
+      deleteFile(doc.ref.openaiID);
+      Files.deleteOne(doc.ref.fileID);
     }
+    return true;
   } catch (e) {
     console.error(e);
     return false;
   } finally {
     deleteLocalFiles([file.path]);
   }
-}
+};
 
 export const getAllCourseTopics = async (course) => {
   try {
-    const notes = course == null ? await Notes.find({}, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec() : await Notes.find({ index: course }, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec();
+    const notes =
+      course == null
+        ? await Notes.find({}, "_id course topic updatedAt")
+            .sort({ updatedAt: -1 })
+            .exec()
+        : await Notes.find({ index: course }, "_id course topic updatedAt")
+            .sort({ updatedAt: -1 })
+            .exec();
     // const notes = await Notes.find({ index: course }, "_id course topic updatedAt").sort({ updatedAt: -1 }).exec();
     return notes;
   } catch (err) {
@@ -149,10 +168,7 @@ export const getAllCourseTopics = async (course) => {
 // Retrieve notes by ID to return to CLIENT
 export const getTopic = async (id) => {
   try {
-    const notes = await Notes.findById(
-      id, 
-      "_id course topic pdf.filename pdf.size pdf.fileID ref.filename ref.size ref.fileID pdf.created ref.created saq mcq"
-    );
+    const notes = await Notes.findById(id);
     return notes;
   } catch (err) {
     console.error(`Could not find notes with id: ${id}`);
@@ -163,32 +179,38 @@ export const getTopic = async (id) => {
 // Retrieve fileIDs of a particular notes(id) to pass to OpenAI
 export const fetchFileIDs = async (id) => {
   try {
-    const notes = await Notes.findById(id, "_id pdf.fileID ref.fileID");
+    const notes = await Notes.findById(id, "_id pdf.openaiID ref.openaiID");
     console.log(notes);
     return notes;
   } catch (e) {
     console.error(e);
   }
-}
+};
 
 export const deleteLocalFiles = (paths) => {
-  paths.forEach(path => {
+  paths.forEach((path) => {
     //console.log(path);
     fs.unlink(path, (err) => {
       if (err) {
         console.error(`Could not delete ${path}`);
       }
     });
-  })
+  });
 };
 
 export const getNotesFile = async (id, type) => {
   try {
     let notes;
     if (type === "pdf") {
-      notes = await Notes.findOne({ "pdf.fileID": id }, "pdf.filename pdf.data pdf.contentType");
+      notes = await Notes.findOne(
+        { "pdf.fileID": id },
+        "pdf.filename pdf.data pdf.contentType"
+      );
     } else if (type === "ref") {
-      notes = await Notes.findOne({ "ref.fileID": id }, "ref.filename ref.data ref.contentType");
+      notes = await Notes.findOne(
+        { "ref.fileID": id },
+        "ref.filename ref.data ref.contentType"
+      );
     } else {
       return null;
     }
@@ -197,6 +219,4 @@ export const getNotesFile = async (id, type) => {
     console.log(err);
     return null;
   }
-}
-
-export const Notes = mongoose.model("Notes", notesSchema);
+};

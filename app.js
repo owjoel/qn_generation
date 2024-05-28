@@ -28,6 +28,12 @@ app.use(
 app.use(notesRoutes);
 app.use(questionsRoutes);
 
+// Error Handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('We encountered an issue. Please try again.');
+});
+
 // Initialise DB and server
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING)
