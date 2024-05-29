@@ -3,7 +3,7 @@ import { Router } from "express";
 
 import { generate } from "../utils/generate.js";
 import { fetchFileIDs } from "../models/notes.js";
-import { saveSAQ, saveMCQ, createMCQ, createSAQ, updateSAQ, updateMCQ, deleteSAQ, deleteMCQ } from "../models/questions.js";
+import { saveSAQ, saveMCQ, createMCQ, createSAQ, updateSAQ, updateMCQ, deleteSAQ, deleteMCQ, exportSAQ, exportMCQ } from "../models/questions.js";
 import { encodeToJSON } from "../utils/encoder.js";
 import { createExcelFromJSON } from "../utils/files.js";
 import path, { dirname } from "path";
@@ -11,7 +11,6 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-console.log(__dirname);
 const router = Router();
 
 const MAX_ATTEPMTS = 3;
@@ -151,5 +150,31 @@ router.delete('/questions/mcq/:id/:questionID', async (req, res, next) => {
     next(err);
   };
 });
+
+router.post('/questions/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { type, questionIDs } = req.body;
+    let filename;
+    if (type === SAQ) {
+      filename = await exportSAQ(id, questionIDs);
+    } else if ( type === MCQ) {
+      filename = await exportMCQ(id, questionIDs);
+    } else {
+      res.status(422).send('Invalid question type.')
+    }
+
+    const filepath = path.join(__dirname, "..", "public/output", filename);
+    console.log(filepath);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`
+    );
+    res.sendFile(filepath);
+
+  } catch (err) {
+    next(err);
+  }
+})
 
 export default router;

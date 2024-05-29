@@ -52,12 +52,12 @@ export const createJSONFromFile = (filename, filepath) => {
 
 export const createExcelFromJSON = (result, course, topic) => {
   try {
-    const filename = './public/output/' + course + '-' + topic + '.xlsx';
-    console.log(filename);
+    const filename = course + '-' + topic + '.xlsx';
+    const filepath = "./public/output/" + filename;
     const sheet = xlsx.utils.json_to_sheet(result);
     const wb = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(wb, sheet, "Questions");
-    xlsx.writeFileXLSX(wb, filename)
+    xlsx.writeFileXLSX(wb, filepath)
     return filename;
   } catch (err) {
     console.log(err);
