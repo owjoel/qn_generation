@@ -129,17 +129,18 @@ router.get("/notes", async (req, res) => {
 router.get("/notes/files/:id", async (req, res) => {
   const id = req.params.id;
   const type = req.query.type;
-  const notes = await getNotesFile(id, type);
-  if (!notes) {
+  const result = await getNotesFile(id, type);
+  if (!result) {
     return res.status(404).json({ err: "File not found." });
   }
+  const { file, notes } = result;
   if (type === "pdf") {
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="${notes.pdf.filename}"`
     );
     res.setHeader("Content-Type", notes.pdf.contentType);
-    res.send(notes.pdf.data);
+    res.send(file.data);
   } else {
     res.setHeader(
       "Content-Disposition",

@@ -200,21 +200,24 @@ export const deleteLocalFiles = (paths) => {
 
 export const getNotesFile = async (id, type) => {
   try {
+    const file = await Files.findById(id);
+    console.log(file);
     let notes;
     if (type === "pdf") {
       notes = await Notes.findOne(
         { "pdf.fileID": id },
-        "pdf.filename pdf.data pdf.contentType"
+        "pdf.filename pdf.contentType"
       );
+      
     } else if (type === "ref") {
       notes = await Notes.findOne(
         { "ref.fileID": id },
-        "ref.filename ref.data ref.contentType"
+        "ref.filename ref.contentType"
       );
     } else {
       return null;
     }
-    return notes;
+    return { file, notes };
   } catch (err) {
     console.log(err);
     return null;
