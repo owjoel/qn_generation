@@ -131,12 +131,22 @@ export const updateNotesFiles = async (id, file, opt) => {
       };
     }
     const doc = await Notes.findByIdAndUpdate(id, update);
+    if (doc === null) {
+      console.warn("[Mongo]\tUnable to update notes")
+      return false;
+    }
+    console.info("[Mongo]\tNotes updated");
+    newFile.save()
+      .then(() => {console.info("[Mongo]\tNew file saved")})
+      .catch(() => {console.error("[Mongo]\tUnable to saved file to DB")});
     if (opt === PDF) {
       deleteFile(doc.pdf.openaiID);
-      Files.deleteOne(doc.pdf.fileID);
+      const q = await Files.deleteOne({ _id: doc.pdf.fileID });
+      console.info("[Mongo]\t" + JSON.stringify(q));
     } else {
       deleteFile(doc.ref.openaiID);
-      Files.deleteOne(doc.ref.fileID);
+      const q = await Files.deleteOne({ _id: doc.ref.fileID });
+      console.info("[Mongo]\t" + JSON.stringify(q));
     }
     return true;
   } catch (e) {
@@ -198,28 +208,50 @@ export const deleteLocalFiles = (paths) => {
   });
 };
 
+// export const getNotesFile = async (id, type) => {
+//   try {
+//     console.log(id);
+//     const file = await Files.findById(id);
+//     let notes;
+//     if (type === "pdf") {
+//       notes = await Notes.findOne(
+//         { "pdf.fileID": id },
+//         "pdf.filename pdf.contentType"
+//       );
+      
+//     } else if (type === "ref") {
+//       notes = await Notes.findOne(
+//         { "ref.fileID": id },
+//         "ref.filename ref.contentType"
+//       );
+//     } else {
+//       return null;
+//     }
+//     console.info("[Files]\tRetrieved id:" + id);
+//     return { file, notes };
+//   } catch (err) {
+//     console.log(err);
+//     return null;
+//   }
+// };
+
 export const getNotesFile = async (id, type) => {
   try {
-    const file = await Files.findById(id);
-    console.log(file);
     let notes;
+    let file;
     if (type === "pdf") {
-      notes = await Notes.findOne(
-        { "pdf.fileID": id },
-        "pdf.filename pdf.contentType"
-      );
-      
+      notes = await Notes.findById(id, " pdf.filename pdf.contentType pdf.fileID ");
+      file = await Files.findById(notes.pdf.fileID);
     } else if (type === "ref") {
-      notes = await Notes.findOne(
-        { "ref.fileID": id },
-        "ref.filename ref.contentType"
-      );
+      notes = await Notes.findById(id, " ref.filename ref.contentType ref.fileID ");
+      file = await Files.findById(notes.ref.fileID);
     } else {
       return null;
     }
+    console.info(`[Notes]\tRetrieved ${type} for id: ${id}`);
     return { file, notes };
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return null;
   }
-};
+}

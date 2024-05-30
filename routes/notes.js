@@ -125,7 +125,7 @@ router.get("/notes", async (req, res) => {
 });
 
 
-// GET: File by ID
+// GET: File by Notes ID
 router.get("/notes/files/:id", async (req, res) => {
   const id = req.params.id;
   const type = req.query.type;
@@ -147,7 +147,7 @@ router.get("/notes/files/:id", async (req, res) => {
       `attachment; filename="${notes.ref.filename}"`
     );
     res.setHeader("Content-Type", notes.ref.contentType);
-    res.send(notes.ref.data);
+    res.send(file.data);
   }
 });
 
