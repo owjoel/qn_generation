@@ -4,7 +4,7 @@ import { createExcelFromJSON } from "../utils/files.js";
 // save generated SAQ into a specific notes by ID
 export async function saveSAQ(id, result) {
   const data = result.map((question) => {
-    question: question.Title;
+    return { question: question.Title }
   });
   const update = { $push: { saq: { $each: data } } };
   const doc = await Notes.findByIdAndUpdate(id, update);
@@ -40,10 +40,14 @@ export async function saveMCQ(id, result) {
   return true;
 }
 
-export async function updateSAQ(notesID, questionID, question) {
+export async function updateSAQ(notesID, questionID, data) {
+  const { question, answers, manualCategory, maxMarks } = data
   const notes = await Notes.findById(notesID);
   const doc = notes.saq.id(questionID);
   doc.question = question;
+  doc.answers = answers;
+  doc.manualCategory = manualCategory;
+  doc.maxMarks = maxMarks;
   const result = await notes.save();
   if (!result) {
     return false;

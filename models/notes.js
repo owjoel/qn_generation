@@ -40,6 +40,10 @@ const notesSchema = new mongoose.Schema(
     saq: [
       new mongoose.Schema({
         question: String,
+        category: String,
+        manualCategory: Number,
+        maxMarks: Number,
+        answers: [{answer: String, feedback: String, score: Number}],
       }),
     ],
     mcq: [
@@ -207,33 +211,6 @@ export const deleteLocalFiles = (paths) => {
     });
   });
 };
-
-// export const getNotesFile = async (id, type) => {
-//   try {
-//     console.log(id);
-//     const file = await Files.findById(id);
-//     let notes;
-//     if (type === "pdf") {
-//       notes = await Notes.findOne(
-//         { "pdf.fileID": id },
-//         "pdf.filename pdf.contentType"
-//       );
-      
-//     } else if (type === "ref") {
-//       notes = await Notes.findOne(
-//         { "ref.fileID": id },
-//         "ref.filename ref.contentType"
-//       );
-//     } else {
-//       return null;
-//     }
-//     console.info("[Files]\tRetrieved id:" + id);
-//     return { file, notes };
-//   } catch (err) {
-//     console.log(err);
-//     return null;
-//   }
-// };
 
 export const getNotesFile = async (id, type) => {
   try {

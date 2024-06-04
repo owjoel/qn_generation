@@ -18,46 +18,52 @@ const SAQ = "saq";
 const MCQ = "mcq";
 
 router.put("/questions", async (req, res, next) => {
-  const { id, course, topic, keywords, type, num } = req.body;
+  try {
+    const { id, course, topic, keywords, type, num } = req.body;
 
-  const notes = await fetchFileIDs(id);
-  if (notes == null) {
-    console.log('Notes not found for id: ' + id);
-    return res.status(422).json({ err: 'Files were not found' });
-  }
-  const files = [notes.pdf.openaiID, notes.ref.openaiID];
-
-  for (let i = 0; i < MAX_ATTEPMTS; i++) {
-    const output = await generate({
-      course: course,
-      topic: topic,
-      keywords: keywords,
-      questionType: type,
-      numQuestions: num,
-      files: files,
-    });
-
-    if (output) {
-      // console.log(output);
-      fs.writeFile('./public/questions.txt', output, (err) => {
-        if (err) next(err);
-        else console.log("Raw output written to file");
-      })
-      const result = await encodeToJSON(type, output); // JSON object of questions
-      let ok;
-      if (type === SAQ) {
-        ok = saveSAQ(id, result);
-      } else if (type === MCQ) {
-        ok = saveMCQ(id, result);
-      }
-      if (!ok) {
-        return res.status(422).send('Could not save questions.');
-      }
-      return res.status(200).json(result);
-      // const filename = createExcelFromJSON(result, course, topic);
+    const notes = await fetchFileIDs(id);
+    if (notes == null) {
+      console.log('Notes not found for id: ' + id);
+      return res.status(422).json({ err: 'Files were not found' });
     }
+    const files = [notes.pdf.openaiID, notes.ref.openaiID];
+  
+    for (let i = 0; i < MAX_ATTEPMTS; i++) {
+      const output = await generate({
+        course: course,
+        topic: topic,
+        keywords: keywords,
+        questionType: type,
+        numQuestions: num,
+        files: files,
+      });
+  
+      if (output) {
+        //console.log(output);
+        fs.writeFile('./public/questions.txt', output, (err) => {
+          if (err) next(err);
+          else console.log("Raw output written to file");
+        })
+        const result = await encodeToJSON(type, output); // JSON object of questions
+        // console.log("Logging from /routes/questions.js");
+        // console.log(result);
+        let ok;
+        if (type === SAQ) {
+          ok = saveSAQ(id, result);
+        } else if (type === MCQ) {
+          ok = saveMCQ(id, result);
+        }
+        if (!ok) {
+          return res.status(422).send('Could not save questions.');
+        }
+        return res.status(200).json(result);
+        // const filename = createExcelFromJSON(result, course, topic);
+      }
+    }
+    res.status(422).json({ err: 'Model failed to output.' });
+  } catch (err) {
+    next(err)
   }
-  res.status(422).json({ err: 'Model failed to output.' });
 });
 
 // Create SAQ
@@ -99,6 +105,7 @@ router.put('/questions/saq/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
     const { _id, question } = req.body;
+    console.log(question);
     const ok = await updateSAQ(id, _id, question);
     if (!ok) {
       return res.status(422).send('Could not update question.');

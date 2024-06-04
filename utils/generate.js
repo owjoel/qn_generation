@@ -2,24 +2,12 @@ import fs from "fs";
 import { config } from "dotenv";
 import OpenAI from "openai";
 
-import { genAssistantInstructions, threadPrompt } from "./prompt.js";
+import { threadPrompt } from "./prompt.js";
 
 config();
 const openai = new OpenAI();
 
-// Create a new OpenAI assistant if assistant not found.
-export const createAssistant = async (pdf, xlsx) => {
-  const assistant = await openai.beta.assistants.create({
-    name: "Question Generator",
-    instructions: genAssistantInstructions,
-    model: "gpt-3.5-turbo-0125",
-    tools: [{ type: "file_search" }],
-  });
-  console.log(assistant);
-  return assistant;
-};
-
-// Converts multer file to stream. Adds file to the organisation's directory on OpenAI. Returns the ID.
+// Upload file to OpenAI
 export const addFile = async (filepath) => {
   const f = await openai.files.create({
     file: fs.createReadStream(filepath),
@@ -38,14 +26,7 @@ export const deleteFile = async (fileID) => {
   return false;
 }
 
-// Updates the specified assistant with the new vector store.
-export async function updateAssistantWithStore(assistantID, storeID) {
-  await openai.beta.assistants.update(assistantID, {
-    tool_resources: { file_search: { vector_store_id: [storeID] } },
-  });
-}
-
-// TODO: files needs to be a mapped array of objects
+// 
 export async function generate(options) {
   const {course, topic, keywords, questionType, numQuestions, files} = options;
   const assistantID = process.env.OPENAI_ASSISTANT_GENERATOR;
@@ -73,33 +54,8 @@ export async function generate(options) {
   const message = messages.data.pop();
   if (message.content[0].type == 'text') {
     const { text } = message.content[0];
-    //console.log(text.value);
     console.log(`[OpenAI] Thread created: ${run.thread_id}`);
     return text.value;
   }
   return null;
 };
-
-export const retrieveAssistant = async (id) => {
-  const assistant = await openai.beta.assistants.retrieve(id);
-  return assistant;
-};
-
-// export const createVectorStore = async (course, topic, files) => {
-//   const vs = await openai.beta.vectorStores.create({
-//     name: `${course}-${topic}`,
-//     file_ids: files,
-//   });
-//   console.log(`[OpenAI] Vector store created: id=${vs.id}, name=${vs.name}`);
-//   return vs.id;
-// }
-
-// export const generate = async (options) => {
-//   const output = await createThreadAndRun(options);
-//   return output;
-// }
-
-export const showMessages = async (id) => {
-  const messages = await openai.beta.threads.messages.list(id);
-  return messages;
-}

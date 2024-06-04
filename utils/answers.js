@@ -1,11 +1,41 @@
-// Uses an OpenAI assistant for converting text content to a JSON format for xlsx to parse
-
 import { config } from "dotenv";
 import OpenAI from "openai";
-import { encoderMessage, mcqFormat, saqFormat } from "./prompt.js";
+import { answerFormat, encoderMessage, sampleAnswerMessage } from "./prompt.js";
 
 config();
 const openai = new OpenAI();
+const assistantID = process.env.OPENAI_ASSISTANT_ANSWERS;
+
+export async function generate(options) {
+  const { question, openaiID, maxMark } = options;
+  const msg = sampleAnswerMessage(question, maxMark);
+  console.log(msg);
+
+  const thread = await openai.beta.threads.create({
+    messages: [
+      {
+        role: "user",
+        attachments: [{ file_id: openaiID, tools: [{ type: "file_search" }] }],
+        content: msg,
+      },
+    ],
+  });
+
+  const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+    assistant_id: assistantID,
+  });
+
+  const messages = await openai.beta.threads.messages.list(thread.id, {
+    run_id: run.id,
+  });
+
+  const message = messages.data.pop();
+  if (message.content[0].type == "text") {
+    const { text } = message.content[0];
+    console.log(`[OpenAI] Thread created: ${run.thread_id}`);
+    return text.value;
+  }
+}
 
 async function handleRequiresAction(run, output, type) {
   const threadID = run.thread_id;
@@ -20,7 +50,7 @@ async function handleRequiresAction(run, output, type) {
         if (tool.function.name === "getOutputFormat") {
           return {
             tool_call_id: tool.id,
-            output: (type === 'saq') ? JSON.stringify(saqFormat) : JSON.stringify(mcqFormat),
+            output: output,
           }
         } else if (tool.function.name === 'createJSON') {
           return {
@@ -60,7 +90,7 @@ async function handleRunStatus(run, output, type) {
 }
 
 export async function encodeToJSON(type, output) {
-  const assistantID = process.env.OPENAI_ASSISTANT_ENCODER;
+  const assistantID = process.env.OPENAI_ASSISTANT_ANSWER_ENCODER;
   const thread = await openai.beta.threads.create();
   const message = openai.beta.threads.messages.create(thread.id, {
     role: "user",
@@ -73,6 +103,7 @@ export async function encodeToJSON(type, output) {
   if (!jsonString) {
     return null;
   }
-  const result = JSON.parse(jsonString).output;
-  return result;
+  if (type === "answer") {
+    return JSON.parse(jsonString);
+  }
 }

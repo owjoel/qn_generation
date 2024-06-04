@@ -1,10 +1,30 @@
 [
   {
     "Type": "OpenQuestion",
-    "Title": "<Fill in Question here>"
+    "Title": "<Fill in Question here>",
+    "Answer1": "<Fill in Answer Here>",
+    "Answer2": "<Fill in Answer Here>",
+    "Answer3": "<Fill in Answer Here>",
+    "Answer4": "<Fill in Answer Here>",
+    "Answer5": "<Fill in Answer Here>",
+    "Answer6": "<Fill in Answer Here>",
+    "Answer7": "<Fill in Answer Here>",
+    "Answer8": "<Fill in Answer Here>",
+    "Answer9": "<Fill in Answer Here>",
+    "Answer10": "<Fill in Answer Here>"
   },
   {
     "Type": "OpenQuestion",
-    "Title": "<Fill in Question here>"
+    "Title": "<Fill in Question here>",
+    "Answer1": "<Fill in Answer Here>",
+    "Answer2": "<Fill in Answer Here>",
+    "Answer3": "<Fill in Answer Here>",
+    "Answer4": "<Fill in Answer Here>",
+    "Answer5": "<Fill in Answer Here>",
+    "Answer6": "<Fill in Answer Here>",
+    "Answer7": "<Fill in Answer Here>",
+    "Answer8": "<Fill in Answer Here>",
+    "Answer9": "<Fill in Answer Here>",
+    "Answer10": "<Fill in Answer Here>"
   }
 ]

@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import questionsRoutes from "./routes/questions.js";
 import notesRoutes from "./routes/notes.js";
 import localRoutes from "./routes/local.js";
+import answersRoutes from "./routes/answers.js"
 import { fileFilter, fileStorage } from "./utils/files.js";
 import { corsOptions } from "./utils/cors.js";
 import logger from "./utils/logger.js";
@@ -29,6 +30,7 @@ app.use(
 // Routes
 app.use(notesRoutes);
 app.use(questionsRoutes);
+app.use(answersRoutes);
 app.use(localRoutes);
 
 // Logging

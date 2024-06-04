@@ -8,27 +8,33 @@ export const genAssistantInstructions =
   The output should be an excel file (.xlsx) in the same format as either the SAQ_Template.json or \
   MXQ_Template.json accoridngly in your own assistant vector store.";
 
-export const encoderAssistantinstructions = 
+export const encoderAssistantinstructions =
   "You are a JSON file creator. A message containing questions and answers will be provided. \
-  Use the provided function to return a JSON file."
+  Use the provided function to return a JSON file.";
+
+export const sampleAnswerMessage = (question, maxMarks) => {
+  return `Question: ${question}\nMaximum Marks: ${maxMarks}`;
+};
 
 export const encoderMessage = (type, output) => {
   let format;
-  if (type === 'saq') {
+  if (type === "saq") {
     format = JSON.stringify(saqFormat);
-  } else if (type === 'mcq') {
+  } else if (type === "mcq") {
     format = JSON.stringify(mcqFormat);
+  } else if (type === "answer") {
+    format = JSON.stringify(answerFormat);
+    console.log(format);
   }
-  const prompt = output + '\n format: ' + format;
+  const prompt = output + "\n format: " + format;
   return prompt;
-}
+};
 
 export const threadPrompt = (course, topic, keywords, questionType, num) => {
   console.log(questionType);
   let specific = "";
   let type = "";
   if (questionType === "saq") {
-    specific = "Provide both questions and answers. Answer should come immediately after each question.";
     type = "short answer questions";
   } else {
     specific =
@@ -36,41 +42,69 @@ export const threadPrompt = (course, topic, keywords, questionType, num) => {
       Correct answer number should come immediately after the question, followed by the options, numbered.";
     type = "multiple choice questions";
   }
-  const prompt = 
-    `Generate ${num} ${type} relating to ${keywords} in the ${course} ${topic} lecture notes, ${specific}`;
+  const prompt = `Refer to the reference file for sample questions. Generate ${num} ${type} relating to ${keywords} in the ${course} ${topic} lecture notes. ${specific}`;
   console.log(prompt);
   return prompt;
 };
 
-export const mcqFormat = [{
-  "Type": "MCQ",
-  "Title": "",
-  "Correct": "<Correct Option Number>",
-  "Choice_1": "",
-  "Choice_2": "",
-  "Choice_3": "",
-  "Choice_4": ""
-},
-{
-  "Type": "MCQ",
-  "Title": "",
-  "Correct": "<Correct Option Number>",
-  "Choice_1": "",
-  "Choice_2": "",
-  "Choice_3": "",
-  "Choice_4": ""
-}]
+export const mcqFormat = [
+  {
+    Type: "MCQ",
+    Title: "",
+    Correct: "<Correct Option Number>",
+    Choice_1: "",
+    Choice_2: "",
+    Choice_3: "",
+    Choice_4: "",
+  },
+  {
+    Type: "MCQ",
+    Title: "",
+    Correct: "<Correct Option Number>",
+    Choice_1: "",
+    Choice_2: "",
+    Choice_3: "",
+    Choice_4: "",
+  },
+];
 
 export const saqFormat = [
   {
-    "Type": "OpenQuestion",
-    "Title": ""
+    Type: "OpenQuestion",
+    Title: "",
   },
-  {
-    "Type": "OpenQuestion",
-    "Title": ""
-  }
-]
+];
+
+export const answerFormat = {
+  category: "",
+  answers: [
+    {
+      answer: "",
+      score: 5,
+      feedback: "",
+    },
+    {
+      answer: "",
+      score: 5,
+      feedback: "",
+    },
+    {
+      answer: "",
+      score: 5,
+      feedback: "",
+    },
+    {
+      answer: "",
+      score: 5,
+      feedback: "",
+    },
+    {
+      answer: "",
+      score: 5,
+      feedback: "",
+    },
+  ],
+};
 
 /*
   Analyse the input text and extract the questions and answers. Then create a JSON object containing the questions and answers \
